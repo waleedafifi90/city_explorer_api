@@ -37,6 +37,7 @@ app.get('/location', (req, res) => {
 });
 
 app.get('/weather', (req, res) => {
+    Weather.all = [];
   const weatherData = require('./data/weather.json');
   let city = req.query.city;
   weatherData.data.forEach(item => {
