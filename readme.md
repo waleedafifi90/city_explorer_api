@@ -19,4 +19,49 @@
 
 ## Credits and Collaborations
 <!-- Give credit (and a link) to other people or resources that helped you build this application. -->
--->
+
+### Number and name of feature:  Repository Set Up
+
+Estimate of time needed to complete: 30 min
+
+Start time: 12:30
+
+Finish time: 12:50
+
+Actual time needed to complete: 20 min
+
+
+
+### Number and name of feature:  Locations
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 13:00
+
+Finish time: 13:35
+
+Actual time needed to complete: 35 min
+
+
+
+### Number and name of feature:  Weather
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 13:50
+
+Finish time: 15:00
+
+Actual time needed to complete: 70 min
+
+
+
+### Number and name of feature:  Errors
+
+Estimate of time needed to complete: 30 hour
+
+Start time: 15:10
+
+Finish time: 15:30
+
+Actual time needed to complete: 20 min
