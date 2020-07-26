@@ -23,9 +23,26 @@ function Location(city, data) {
   this.longitude = data[0].lon;
 }
 
+function Weather(city, data){
+  this.forecast = data.weather;
+  this.time = data.datetime;
+  Weather.all.push(this);
+}
+Weather.all=[];
+
 app.get('/location', (req, res) => {
   const data = require('./data/location.json');
   let city = req.query.city;
   let locationData = new Location(city, data);
   res.send(locationData);
+});
+
+app.get('/weather', (req, res) => {
+  const weatherData = require('./data/weather.json');
+  let city = req.query.city;
+  weatherData.data.forEach(item => {
+    let newData = new Weather(city, item);
+  });
+//   console.log(weatherData);
+  res.send(Weather.all);
 });
