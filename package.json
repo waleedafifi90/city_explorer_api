@@ -21,6 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "node-datetime": "^2.1.2"
+    "node-datetime": "^2.1.2",
+    "nodemon": "^2.0.4"
   }
 }

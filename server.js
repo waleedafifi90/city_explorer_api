@@ -2,7 +2,6 @@
 
 const server = require('express');
 const cors = require('cors');
-// const { request } = require('express');
 require('dotenv').config();
 
 const app = server();
