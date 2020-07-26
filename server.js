@@ -2,7 +2,7 @@
 
 const server = require('express');
 const cors = require('cors');
-const { request } = require('express');
+// const { request } = require('express');
 require('dotenv').config();
 
 const app = server();
@@ -41,15 +41,11 @@ app.get('/weather', (req, res) => {
   const weatherData = require('./data/weather.json');
   let city = req.query.city;
   weatherData.data.forEach(item => {
-    let day = getDay(item)[0];
-    let daynum = getDay(item)[1];
 
-    let month = getMonthandYear(item)[0];
-    let year = getMonthandYear(item)[1];
+    const time = new Date(item.valid_date);
+    let longTimeStamp = time.toString();
 
-    let longTimeStamp = `${day} ${month} ${daynum} ${year}`;
-
-    let newData = new Weather(city, item, longTimeStamp);
+    let newData = new Weather(city, item, longTimeStamp.toString().substr(0, 15));
   });
   //   console.log(weatherData);
   res.send(Weather.all);
@@ -57,37 +53,14 @@ app.get('/weather', (req, res) => {
 
 
 
+function dateToString(date) {
+  var options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+  // console.log(date.toLocaleDateString('de-DE', options));
+  // → "Donnerstag, 20. Dezember 2012"
 
-function getDay(item){
-  var weekday = new Array(7);
-  weekday[0] = 'Sunday';
-  weekday[1] = 'Monday';
-  weekday[2] = 'Tuesday';
-  weekday[3] = 'Wednesday';
-  weekday[4] = 'Thursday';
-  weekday[5] = 'Friday';
-  weekday[6] = 'Saturday';
+  // an application may want to use UTC and make that visible
+  options.timeZone = 'UTC';
+  options.timeZoneName = 'short';
+  return (date.toLocaleDateString('en-US', options));
 
-  let d = new Date(`${item.valid_date}`);
-  let day = weekday[d.getDay()];
-  return [day,d.getDay()];
-}
-function getMonthandYear(item){
-  var d = new Date(`${item.valid_date}`);
-  var month = new Array();
-  month[0] = 'January';
-  month[1] = 'February';
-  month[2] = 'March';
-  month[3] = 'April';
-  month[4] = 'May';
-  month[5] = 'June';
-  month[6] = 'July';
-  month[7] = 'August';
-  month[8] = 'September';
-  month[9] = 'October';
-  month[10] = 'November';
-  month[11] = 'December';
-  var n = month[d.getMonth()];
-  var nyear = d.getFullYear();
-  return [n,nyear];
 }
