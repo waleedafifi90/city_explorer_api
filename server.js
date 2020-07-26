@@ -30,16 +30,19 @@ function Weather(city, data, longTimeStamp){
 Weather.all=[];
 
 app.get('/location', (req, res) => {
-  const data = require('./data/location.json');
   let city = req.query.city;
+  if(!city) { res.status(400).send({ 'status': 400, msg: 'Parameter missing!'}); }
+  const data = require('./data/location.json');
   let locationData = new Location(city, data);
   res.send(locationData);
 });
 
 app.get('/weather', (req, res) => {
-    Weather.all = [];
-  const weatherData = require('./data/weather.json');
+  Weather.all = [];
   let city = req.query.city;
+  if(!city) { res.status(400).send({ 'status': 400, msg: 'Parameter missing!'}); }
+
+  const weatherData = require('./data/weather.json');
   weatherData.data.forEach(item => {
 
     const time = new Date(item.valid_date);
@@ -51,7 +54,9 @@ app.get('/weather', (req, res) => {
   res.send(Weather.all);
 });
 
-
+app.all('*', (req, res) => {
+  res.status(500).send({ 'status': 500, msg: 'Sorry, something went wrong'});
+});
 
 function dateToString(date) {
   var options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
