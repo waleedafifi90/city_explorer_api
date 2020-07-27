@@ -31,7 +31,11 @@ Weather.all=[];
 
 app.get('/location', (req, res) => {
   let city = req.query.city;
+  let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
+  
+  if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
   if(!city) { res.status(400).send({ 'status': 400, msg: 'Parameter missing!'}); }
+  
   const data = require('./data/location.json');
   let locationData = new Location(city, data);
   res.send(locationData);
@@ -40,6 +44,9 @@ app.get('/location', (req, res) => {
 app.get('/weather', (req, res) => {
   Weather.all = [];
   let city = req.query.city;
+  let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
+  
+  if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
   if(!city) { res.status(400).send({ 'status': 400, msg: 'Parameter missing!'}); }
 
   const weatherData = require('./data/weather.json');
