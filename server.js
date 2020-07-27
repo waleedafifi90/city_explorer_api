@@ -47,7 +47,7 @@ app.get('/weather', (req, res) => {
   // let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
   
   // if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
-  if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
+  // if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
 
   const weatherData = require('./data/weather.json');
   weatherData.data.forEach(item => {
