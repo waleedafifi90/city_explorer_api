@@ -74,7 +74,7 @@ function getData(city){
 }
 
 function handelWeather(req, res) {
-  let city = req.query.city;
+  let city = req.query.search_query;
 
   getWeather(city).then( returnedData => {
     res.send(returnedData);
