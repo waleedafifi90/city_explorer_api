@@ -32,10 +32,10 @@ Weather.all=[];
 app.get('/location', (req, res) => {
   let city = req.query.city;
   let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
-  
+
   if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
   if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
-  
+
   const data = require('./data/location.json');
   let locationData = new Location(city, data);
   res.send(locationData);
@@ -45,19 +45,21 @@ app.get('/weather', (req, res) => {
   Weather.all = [];
   let city = req.query.city;
   // let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
-  
+
   // if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
   // if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
 
-  const weatherData = require('./data/weather.json');
-  weatherData.data.forEach(item => {
+  // const weatherData = require('./data/weather.json');
+  
+  // weatherData.data.map(item => {
 
-    const time = new Date(item.valid_date);
-    let longTimeStamp = time.toString();
+  //   const time = new Date(item.valid_date);
+  //   let longTimeStamp = time.toString();
 
-    let newData = new Weather(city, item, longTimeStamp.toString().substr(0, 15));
-  });
+  //   let newData = new Weather(city, item, longTimeStamp.toString().substr(0, 15));
+  // });
   //   console.log(weatherData);
+  getWeather(city);
   res.send(Weather.all);
 });
 
@@ -67,12 +69,18 @@ app.all('*', (req, res) => {
 
 function dateToString(date) {
   var options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-  // console.log(date.toLocaleDateString('de-DE', options));
-  // → "Donnerstag, 20. Dezember 2012"
-
-  // an application may want to use UTC and make that visible
   options.timeZone = 'UTC';
   options.timeZoneName = 'short';
   return (date.toLocaleDateString('en-US', options));
 
+}
+
+function getWeather(city) {
+  Weather.all = [];
+  const weatherData = require('./data/weather.json') || [];
+
+  console.log(weatherData.data);
+  return weatherData.data.map( item => {
+    new Weather(city, item);
+  });
 }
