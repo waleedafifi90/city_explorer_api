@@ -22,9 +22,9 @@ function Location(city, data) {
   this.longitude = data[0].lon;
 }
 
-function Weather(city, data, longTimeStamp){
+function Weather(city, data){
   this.forecast = data.weather.description;
-  this.time = longTimeStamp;
+  this.time = new Date(data.valid_date).toString().slice(0, 15);
   Weather.all.push(this);
 }
 Weather.all=[];
@@ -42,7 +42,6 @@ app.get('/location', (req, res) => {
 });
 
 app.get('/weather', (req, res) => {
-  Weather.all = [];
   let city = req.query.city;
   // let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
 
@@ -78,8 +77,6 @@ function dateToString(date) {
 function getWeather(city) {
   Weather.all = [];
   const weatherData = require('./data/weather.json') || [];
-
-  console.log(weatherData.data);
   return weatherData.data.map( item => {
     new Weather(city, item);
   });
