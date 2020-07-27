@@ -62,7 +62,7 @@ app.get('/weather', (req, res) => {
 });
 
 app.all('*', (req, res) => {
-  res.status(500).send({ responseText: 'Sorry, something went wrong'});
+  res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'});
 });
 
 function dateToString(date) {
