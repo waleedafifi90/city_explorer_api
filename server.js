@@ -3,6 +3,7 @@
 const server = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+
 require('dotenv').config();
 
 const app = server();
@@ -32,11 +33,7 @@ Weather.all=[];
 
 app.get('/location', handelLocation);
 
-app.get('/weather', (req, res) => {
-  let city = req.query.city;
-  getWeather(city);
-  res.send(Weather.all);
-});
+app.get('/weather', handelWeather);
 
 app.all('*', (req, res) => {
   res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'});
@@ -76,10 +73,28 @@ function getData(city){
   });
 }
 
+function handelWeather(req, res) {
+  let city = req.query.city;
+
+  getWeather(city).then( returnedData => {
+    res.send(returnedData);
+  }).catch((err) => {
+    console.log(err.message);
+  });
+}
+
 function getWeather(city) {
   Weather.all = [];
-  const weatherData = require('./data/weather.json') || [];
-  return weatherData.data.map( item => {
-    new Weather(city, item);
+
+  let WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+  let NUMBER_OF_DAY = process.env.NUMBER_OF_DAY;
+  let url = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
+
+  return superagent.get(url).then( data => {
+    console.log(data.body.data);
+    return data.body.data.map( item => {
+      // console.log(item.weather);
+      return new Weather(city, item);
+    });
   });
 }
