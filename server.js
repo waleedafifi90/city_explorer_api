@@ -2,6 +2,7 @@
 
 const server = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 require('dotenv').config();
 
 const app = server();
@@ -29,35 +30,10 @@ function Weather(city, data){
 }
 Weather.all=[];
 
-app.get('/location', (req, res) => {
-  let city = req.query.city;
-  let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
-
-  if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
-  if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
-
-  const data = require('./data/location.json');
-  let locationData = new Location(city, data);
-  res.send(locationData);
-});
+app.get('/location', handelLocation);
 
 app.get('/weather', (req, res) => {
   let city = req.query.city;
-  // let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
-
-  // if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
-  // if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
-
-  // const weatherData = require('./data/weather.json');
-  
-  // weatherData.data.map(item => {
-
-  //   const time = new Date(item.valid_date);
-  //   let longTimeStamp = time.toString();
-
-  //   let newData = new Weather(city, item, longTimeStamp.toString().substr(0, 15));
-  // });
-  //   console.log(weatherData);
   getWeather(city);
   res.send(Weather.all);
 });
@@ -72,6 +48,32 @@ function dateToString(date) {
   options.timeZoneName = 'short';
   return (date.toLocaleDateString('en-US', options));
 
+}
+
+function handelLocation(req, res) {
+  let city = req.query.city;
+  let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
+
+  if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
+  if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
+
+  getData(city).then( returnedData => {
+    res.send(returnedData);
+  }).catch((err) => {
+    console.log(err.message);
+  });
+  // const data = require('./data/location.json');
+  // res.send(locationData);
+}
+
+function getData(city){
+  let GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
+  let url = `https://eu1.locationiq.com/v1/search.php?key=${GEOCODE_API_KEY}&q=${city}&format=json`;
+
+  return superagent.get(url).then( data => {
+    let locationData = new Location(city, data.body);
+    return locationData;
+  });
 }
 
 function getWeather(city) {
