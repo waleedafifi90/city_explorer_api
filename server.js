@@ -34,7 +34,7 @@ app.get('/location', (req, res) => {
   let reqex = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
   
   if (!reqex.test(city)) { res.status(422).send({ 'status': 422, msg: 'Please enter a valid city name!'}); }
-  if(!city) { res.status(400).send({ 'status': 400, responseText: 'Parameter missing!'}); }
+  if(!city) { res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'}); }
   
   const data = require('./data/location.json');
   let locationData = new Location(city, data);
@@ -62,7 +62,7 @@ app.get('/weather', (req, res) => {
 });
 
 app.all('*', (req, res) => {
-  res.status(500).send({ 'status': 500, msg: 'Sorry, something went wrong'});
+  res.status(500).send({ 'status': 500, responseText: 'Sorry, something went wrong'});
 });
 
 function dateToString(date) {
