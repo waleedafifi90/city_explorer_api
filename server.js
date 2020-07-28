@@ -9,13 +9,15 @@ require('dotenv').config();
 
 const app = server();
 
+const client = new pg.Client(process.env.DATABASE_URL);
+
 const PORT = process.env.PORT || 3100;
 
 app.use(cors());
 
-app.listen(PORT, () => {
-  console.log('Server is listening to port ', PORT);
-});
+// app.listen(PORT, () => {
+//   console.log('Server is listening to port ', PORT);
+// });
 
 
 function Location(city, data) {
@@ -42,10 +44,10 @@ function Trails(data) {
   this.trail_url = data.url;
   this.conditions = data.conditionStatus;
   this.condition_date = new Date(data.conditionDate).toLocaleDateString();
-  this.condition_time = new Date(data.conditionDate).toLocaleTimeString('en-US', { hour12: false, 
-    hour: "numeric", 
-    minute: "numeric",
-    second: "numeric"});
+  this.condition_time = new Date(data.conditionDate).toLocaleTimeString('en-US', { hour12: false,
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'});
   Trails.all.push(this);
 }
 Trails.all = [];
@@ -143,3 +145,12 @@ function getTrails(lat, lon) {
     });
   });
 }
+
+client.connect()
+  .then(() => {
+    app.listen(PORT, () =>
+      console.log(`listening on ${PORT}`)
+    );
+  }).catch((err) => {
+    console.log(err.message);
+  });
