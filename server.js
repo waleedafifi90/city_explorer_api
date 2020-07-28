@@ -22,9 +22,9 @@ app.use(cors());
 
 function Location(city, data) {
   this.search_query = city;
-  this.formatted_query = data[0].display_name;
-  this.latitude = data[0].lat;
-  this.longitude = data[0].lon;
+  this.formatted_query = data.formatted_query;
+  this.latitude = data.latitude;
+  this.longitude = data.longitude;
 }
 
 function Weather(city, data){
@@ -90,36 +90,108 @@ function getData(city){
   let GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
   let url = `https://eu1.locationiq.com/v1/search.php?key=${GEOCODE_API_KEY}&q=${city}&format=json`;
 
-  return superagent.get(url).then( data => {
-    let locationData = new Location(city, data.body);
-    return locationData;
-  });
+  const SQL = `SELECT * FROM location WHERE search_query=$1;`;
+  const values = [city];
+
+  return client.query(SQL, values)
+    .then(result => {
+      // Check to see if the location was found and return the results
+      if (result.rowCount > 0) {
+        console.log('From SQL');
+        let locationData = new Location(city, result.rows[0]);
+        return locationData;
+        // Otherwise get the location information from the Google API
+      } else {
+        return superagent.get(url).then( data => {
+          console.log('From location API');
+
+          let locationData = new Location(city, data.body);
+
+          let newSQL = `INSERT INTO location (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING id;`;
+          console.log('newSQL', newSQL);
+          let newValues = [city, data.body[0].display_name, data.body[0].lat, data.body[0].lon];
+
+          console.log('newValues', newValues);
+
+          // Add the record to the database
+          return client.query(newSQL, newValues)
+            .then(result => {
+              console.log('result.rows', result.rows);
+
+              console.log('result.rows[0].id', result.rows[0].id);
+              locationData.id = result.rows[0].id;
+              return locationData;
+            })
+            .catch(console.error);
+        });
+      }
+    });
 }
 
 function handelWeather(req, res) {
   let city = req.query.search_query;
 
-  getWeather(city).then( returnedData => {
+  getWeather(req, city).then( returnedData => {
+    console.log('response: ', returnedData);
     res.send(returnedData);
   }).catch((err) => {
     console.log(err.message);
   });
 }
 
-function getWeather(city) {
+function getWeather(req, city) {
   Weather.all = [];
 
   let WEATHER_API_KEY = process.env.WEATHER_API_KEY;
   let NUMBER_OF_DAY = process.env.NUMBER_OF_DAY;
-  let url = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
 
-  return superagent.get(url).then( data => {
-    console.log(data.body.data);
-    return data.body.data.map( item => {
-      // console.log(item.weather);
-      return new Weather(city, item);
+  const SQL = `SELECT * FROM weather WHERE location_id = $1`;
+  const values = [city];
+
+  console.log(SQL);
+
+  // return superagent.get(url).then( data => {
+  //   console.log(data.body.data);
+  //   return data.body.data.map( item => {
+  //     // console.log(item.weather);
+  //     return new Weather(city, item);
+  //   });
+  // });
+
+  return client.query(SQL, values)
+    .then(result => {
+      if (result.rowCount > 0) {
+        console.log('From SQL');
+
+        return result.rows.map( item => {
+          // console.log(item.weather);
+          return new Weather(city, item);
+        });
+      } else {
+        let url = `https://api.weatherbit.io/v2.0/forecast/daily?city=${req.query.city}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
+
+        return superagent.get(url)
+          .then(result => {
+            console.log('From weather API');
+            const weatherSummaries = result.body.data.map(day => {
+              return new Weather(req.query.city, day);
+            });
+
+            let newSQL = `INSERT INTO weather(forecast, time, location_id) VALUES ($1, $2, $3);`;
+  
+            console.log('weatherSummaries', weatherSummaries);
+  
+            weatherSummaries.forEach(summary => {
+              let newValues = [summary.forecast, summary.time, req.query.city];
+
+              return client.query(newSQL, newValues)
+                .catch(console.error);
+            });
+            return weatherSummaries;
+          })
+          .catch(error => console.log(error));
+      }
     });
-  });
 }
 
 function handelTrails(req, res) {
