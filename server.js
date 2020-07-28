@@ -3,6 +3,7 @@
 const server = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const pg = require('pg');
 
 require('dotenv').config();
 
@@ -132,7 +133,7 @@ function handelTrails(req, res) {
 
 function getTrails(lat, lon) {
   let HIKING_API_KEY = process.env.HIKING_API_KEY;
-  let url = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=-${lon}&maxDistance=10&key=${HIKING_API_KEY}`;
+  let url = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lon}&maxDistance=1000&key=${HIKING_API_KEY}`;
 
   return superagent.get(url).then( data => {
     console.log(data.body.trails);
