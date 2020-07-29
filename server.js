@@ -144,54 +144,15 @@ function getWeather(req, city) {
 
   let WEATHER_API_KEY = process.env.WEATHER_API_KEY;
   let NUMBER_OF_DAY = process.env.NUMBER_OF_DAY;
+  let url = `https://api.weatherbit.io/v2.0/forecast/daily?city=${req.query.city}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
 
-  const SQL = `SELECT * FROM weather WHERE location_id = $1`;
-  const values = [city];
-
-  console.log(SQL);
-
-  // return superagent.get(url).then( data => {
-  //   console.log(data.body.data);
-  //   return data.body.data.map( item => {
-  //     // console.log(item.weather);
-  //     return new Weather(city, item);
-  //   });
-  // });
-
-  return client.query(SQL, values)
-    .then(result => {
-      if (result.rowCount > 0) {
-        console.log('From SQL');
-
-        return result.rows.map( item => {
-          // console.log(item.weather);
-          return new Weather(city, item);
-        });
-      } else {
-        let url = `https://api.weatherbit.io/v2.0/forecast/daily?city=${req.query.city}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
-
-        return superagent.get(url)
-          .then(result => {
-            console.log('From weather API');
-            const weatherSummaries = result.body.data.map(day => {
-              return new Weather(req.query.city, day);
-            });
-
-            let newSQL = `INSERT INTO weather(forecast, time, location_id) VALUES ($1, $2, $3);`;
-  
-            console.log('weatherSummaries', weatherSummaries);
-  
-            weatherSummaries.forEach(summary => {
-              let newValues = [summary.forecast, summary.time, req.query.city];
-
-              return client.query(newSQL, newValues)
-                .catch(console.error);
-            });
-            return weatherSummaries;
-          })
-          .catch(error => console.log(error));
-      }
+  return superagent.get(url).then( data => {
+    console.log(data.body.data);
+    return data.body.data.map( item => {
+      // console.log(item.weather);
+      return new Weather(city, item);
     });
+  });
 }
 
 function handelTrails(req, res) {
