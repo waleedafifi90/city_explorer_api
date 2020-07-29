@@ -145,7 +145,7 @@ function getData(city){
 function handelWeather(req, res) {
   let city = req.query.search_query;
 
-  getWeather(city).then( returnedData => {
+  getWeather(req,city).then( returnedData => {
     console.log('response: ', returnedData);
     res.send(returnedData);
   }).catch((err) => {
@@ -153,12 +153,14 @@ function handelWeather(req, res) {
   });
 }
 
-function getWeather(city) {
+function getWeather(req, city) {
   Weather.all = [];
 
   let WEATHER_API_KEY = process.env.WEATHER_API_KEY;
   let NUMBER_OF_DAY = process.env.NUMBER_OF_DAY;
-  let url = `https://api.weatherbit.io/v2.0/forecast/daily?city=${city}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
+  let lat = req.query.latitude;
+  let lon = req.query.longitude;
+  let url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&key=${WEATHER_API_KEY}&days=${NUMBER_OF_DAY}`;
 
   return superagent.get(url).then( data => {
     console.log(data.body.data);
