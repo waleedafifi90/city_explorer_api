@@ -13,7 +13,20 @@ const client = new pg.Client(process.env.DATABASE_URL);
 
 const PORT = process.env.PORT || 3100;
 
-app.use(cors());
+app.all("*", (req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, HEAD, PUT, PATCH, POST, DELETE"
+  );
+
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
 
 // app.listen(PORT, () => {
 //   console.log('Server is listening to port ', PORT);
