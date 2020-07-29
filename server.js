@@ -95,19 +95,17 @@ function getData(city){
 
   return client.query(SQL, values)
     .then(result => {
-      // Check to see if the location was found and return the results
       if (result.rowCount > 0) {
         console.log('From SQL');
         let locationData = new Location(city, result.rows[0]);
         return locationData;
-        // Otherwise get the location information from the Google API
       } else {
         return superagent.get(url).then( data => {
           console.log('From location API');
 
           let locationData = new Location(city, data.body);
 
-          let newSQL = `INSERT INTO location (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING id;`;
+          let newSQL = `INSERT INTO location (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING id, search_query, formatted_query, latitude, longitude;`;
           console.log('newSQL', newSQL);
           let newValues = [city, data.body[0].display_name, data.body[0].lat, data.body[0].lon];
 
@@ -119,6 +117,9 @@ function getData(city){
               console.log('result.rows', result.rows);
 
               console.log('result.rows[0].id', result.rows[0].id);
+              locationData.formatted_query = result.rows[0].formatted_query;
+              locationData.latitude = result.rows[0].latitude;
+              locationData.longitude = result.rows[0].longitude;
               locationData.id = result.rows[0].id;
               return locationData;
             })
@@ -153,6 +154,44 @@ function getWeather(req, city) {
       return new Weather(city, item);
     });
   });
+
+  // const SQL = `SELECT * FROM weather WHERE id = $1`;
+  // const values = [180];
+
+  // console.log(SQL);
+  // return client.query(SQL, values)
+  //   .then(result => {
+  //     if (result.rowCount > 0) {
+  //       console.log('From SQL');
+
+  //       return result.rows.map( item => {
+  //         // console.log(item.weather);
+  //         return new Weather(city, item);
+  //       });
+  //     } else {
+
+  //       return superagent.get(url)
+  //         .then(result => {
+  //           console.log('From weather API');
+  //           const weatherSummaries = result.body.data.map(day => {
+  //             return new Weather(req.query.city, day);
+  //           });
+
+  //           let newSQL = `INSERT INTO weather(forecast, time, location_id) VALUES ($1, $2, $3);`;
+
+  //           console.log('weatherSummaries', weatherSummaries);
+
+  //           weatherSummaries.forEach(summary => {
+  //             let newValues = [summary.forecast, summary.time, req.query.city];
+
+  //             return client.query(newSQL, newValues)
+  //               .catch(console.error);
+  //           });
+  //           return weatherSummaries;
+  //         })
+  //         .catch(error => console.log(error));
+  //     }
+  //   });
 }
 
 function handelTrails(req, res) {
